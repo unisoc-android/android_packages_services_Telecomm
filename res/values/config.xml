@@ -74,4 +74,10 @@
     <!-- When true, the options in the call blocking settings to block restricted and unknown
          callers are combined into a single toggle. -->
     <bool name="combine_options_to_block_restricted_and_unknown_callers">true</bool>
+
+    <!-- UNISOC:follow bug1068889 -->
+    <bool name="config_is_show_ims_icon_in_calllog">false</bool>
+
+    <!--UNISOC:modify for bug1147838-->
+    <bool name="config_is_show_main_vice_card_feature">false</bool>
 </resources>

@@ -23,6 +23,9 @@ import android.widget.Toast;
 
 import java.util.concurrent.CompletableFuture;
 
+// Unisoc FL1000060389: Show Rejected calls notifier feature. 
+import com.unisoc.server.telecom.TelecomCmccHelper;
+
 /**
  * Single point of entry for all outgoing and incoming calls.
  * {@link com.android.server.telecom.components.UserCallIntentProcessor} serves as a trampoline that
@@ -104,6 +107,24 @@ public class CallIntentProcessor {
             Intent intent,
             String callingPackage) {
 
+        /* SPRD porting: Add for CMCC requirement bug693518 @{ */
+        int intentVideoState = intent.getIntExtra(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
+                VideoProfile.STATE_AUDIO_ONLY);
+        if (TelecomCmccHelper.getInstance(context).shouldPreventAddVideoCall(callsManager,
+                intentVideoState, callsManager.hasVideoCall())) {
+            return;
+        }/* @} */
+
+        /* Unisoc: Add for VoLTE @{ */
+        Bundle b = intent.getExtras();
+        boolean isConferenceDial = false;
+        String[] callees = null;
+        if(b != null){
+            isConferenceDial = b.getBoolean("android.intent.extra.IMS_CONFERENCE_REQUEST",false);
+            callees = b.getStringArray("android.intent.extra.IMS_CONFERENCE_PARTICIPANTS");
+            Log.d(CallIntentProcessor.class, "processOutgoingCallIntent->isConferenceDial:"+isConferenceDial);
+        }
+        /* @} */
         Uri handle = intent.getData();
         String scheme = handle.getScheme();
         String uriString = handle.getSchemeSpecificPart();
@@ -123,6 +144,11 @@ public class CallIntentProcessor {
         if (clientExtras == null) {
             clientExtras = new Bundle();
         }
+
+        /* Unisoc: Add for VoLTE @{ */
+        clientExtras.putBoolean("android.intent.extra.IMS_CONFERENCE_REQUEST",isConferenceDial);
+        clientExtras.putStringArray("android.intent.extra.IMS_CONFERENCE_PARTICIPANTS",callees);
+        /* @} */
 
         if (intent.hasExtra(TelecomManager.EXTRA_IS_USER_INTENT_EMERGENCY_CALL)) {
             clientExtras.putBoolean(TelecomManager.EXTRA_IS_USER_INTENT_EMERGENCY_CALL,

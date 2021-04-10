@@ -32,6 +32,7 @@ import android.provider.Settings;
 
 import android.telecom.Log;
 import android.telecom.PhoneAccount;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -82,14 +83,23 @@ public class RingtoneFactory {
         if(ringtone == null) {
             // Contact didn't specify ringtone or custom Ringtone creation failed. Get default
             // ringtone for user or profile.
-            Context contextToUse = hasDefaultRingtoneForUser(userContext) ? userContext : mContext;
+            /* Unisoc FL1000060354: Support multi-sim ringtone. @{*/
+            int subId = mCallsManager.getPhoneAccountRegistrar()
+                    .getSubscriptionIdForPhoneAccount(incomingCall.getTargetPhoneAccount());
+            int phoneId = SubscriptionManager.getPhoneId(subId);
+            Context contextToUse = hasDefaultRingtoneForUserForSlot(userContext, phoneId)
+                    ? userContext : mContext;
+            /* @} */
             Uri defaultRingtoneUri;
+            /* Unisoc FL1000060354: Support multi-sim ringtone. @{*/
             if (UserManager.get(contextToUse).isUserUnlocked(contextToUse.getUserId())) {
-                defaultRingtoneUri = RingtoneManager.getActualDefaultRingtoneUri(contextToUse,
-                        RingtoneManager.TYPE_RINGTONE);
+                int type = phoneId == 1 ? RingtoneManager.TYPE_RINGTONE1 : RingtoneManager.TYPE_RINGTONE;
+                defaultRingtoneUri = RingtoneManager.getActualDefaultRingtoneUri(contextToUse, type);
             } else {
-                defaultRingtoneUri = Settings.System.DEFAULT_RINGTONE_URI;
+                defaultRingtoneUri = phoneId == 1 ? Settings.System.DEFAULT_RINGTONE1_URI
+                        : Settings.System.DEFAULT_RINGTONE_URI;
             }
+            /* @} */
             if (defaultRingtoneUri == null) {
                 return null;
             }
@@ -144,13 +154,17 @@ public class RingtoneFactory {
         return null;
     }
 
-    private boolean hasDefaultRingtoneForUser(Context userContext) {
+    /* Unisoc FL1000060354: Support multi-sim ringtone. @{*/
+    private boolean hasDefaultRingtoneForUserForSlot(Context userContext, int phoneId) {
         if(userContext == null) {
             return false;
         }
+        String ringtoneSetting = phoneId == 1 ? Settings.System.RINGTONE1
+                : Settings.System.RINGTONE;
         return !TextUtils.isEmpty(Settings.System.getStringForUser(userContext.getContentResolver(),
-                Settings.System.RINGTONE, userContext.getUserId()));
+                ringtoneSetting, userContext.getUserId()));
     }
+    /* @} */
 
     private boolean isWorkContact(Call incomingCall) {
         CallerInfo contactCallerInfo = incomingCall.getCallerInfo();

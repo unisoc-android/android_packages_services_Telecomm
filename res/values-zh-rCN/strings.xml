@@ -109,4 +109,16 @@
     <string name="phone_strings_emergency_call_made_dialog_title_txt" msgid="7421611725400166580">"已拨打紧急呼救电话"</string>
     <string name="phone_strings_emergency_call_made_dialog_call_blocking_text_txt" msgid="4083285098613193052">"系统已停用来电屏蔽功能，以便急救人员与您联系。"</string>
     <string name="developer_title" msgid="1816273446906554627">"电信开发者菜单"</string>
+    <!-- UNISOC Feature Porting: show main/vice card feature @{ -->
+    <string name="main_card_slot">"主卡: "</string>
+    <string name="vice_card_slot">"副卡: "</string>
+    <!-- @} -->
+    <!-- UNISOC Feature Porting: Flip to silence from incoming calls. @{-->
+    <string name="incomingcall_flipping_silence_title">"翻转静音"</string>
+    <string name="flipping_summary">"来电时翻转手机可以静音"</string>
+    <!-- @} -->
+    <!-- UNISOC Feature Porting: Fade in ringer volume when incoming calls. @{ -->
+    <string name="fade_in_title">"铃声渐进播放"</string>
+    <string name="fade_in_summary">"功能开启时, 来电铃声将会逐渐增大播放"</string>
+    <!-- @} -->
 </resources>
